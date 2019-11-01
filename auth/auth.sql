@@ -8,15 +8,14 @@ CREATE TABLE IF NOT EXISTS auth.auth (
 CREATE OR REPLACE FUNCTION auth.hash_password_trigger()
 RETURNS TRIGGER AS
 $$
-DECLARE
 BEGIN
-    NEW.password := crypt(in_password, gen_salt('bf', 12));
+    NEW.password := crypt(NEW.password, gen_salt('bf', 12));
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER hash_password
-    BEFORE INSERT OR UPDATE
+    BEFORE INSERT OR UPDATE OF password
     ON auth.auth
     FOR EACH ROW
     EXECUTE FUNCTION auth.hash_password_trigger();
@@ -27,13 +26,16 @@ CREATE TRIGGER hash_password
 
 CREATE OR REPLACE FUNCTION auth.create_or_update(
     in_email TEXT,
-    in_password TEXT
+    in_password TEXT,
+    in_old_password TEXT = ''
 ) RETURNS BOOLEAN AS
 $$
 BEGIN
     INSERT INTO auth.auth
         VALUES (in_email, in_password)
-        ON CONFLICT (email) DO UPDATE SET password=in_password;
+        ON CONFLICT (email) DO UPDATE
+                SET password=in_password
+                WHERE (auth.auth.password=crypt(in_old_password, auth.auth.password));
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
