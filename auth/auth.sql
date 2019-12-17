@@ -50,3 +50,19 @@ BEGIN
     RETURN FOUND;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auth.remove(
+    in_email TEXT,
+    in_password TEXT
+) RETURNS TEXT AS
+$$
+DECLARE
+    result TEXT;
+BEGIN
+    DELETE FROM auth.auth
+        WHERE email=in_email
+        AND password=crypt(in_password, password)
+        RETURNING email INTO result;
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql;

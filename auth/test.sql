@@ -22,6 +22,11 @@ BEGIN
     );
 
     RETURN QUERY SELECT ok(
+        NOT auth.authenticate(_email, 'xyzzy'),
+        'Cannot authenticate with incorrect password'
+    );
+
+    RETURN QUERY SELECT ok(
         auth.create_or_update(
             _email, new_plaintext_password, plaintext_password
         ),
@@ -36,6 +41,19 @@ BEGIN
     RETURN QUERY SELECT ok(
         NOT auth.authenticate(_email, plaintext_password),
         'Cannot authenticate with old plaintext password'
+    );
+
+    RETURN QUERY SELECT throws_ok(
+        auth.remove(_email, 'xyzzy'),
+        '22004',
+        'query string argument of EXECUTE is null',
+        'Cannot remove auth entry with incorrect password'
+    );
+
+    RETURN QUERY SELECT is(
+        auth.remove(_email, new_plaintext_password),
+        _email,
+        'Can remove auth entry with correct password'
     );
 END;
 $$ LANGUAGE plpgsql;
