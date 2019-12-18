@@ -66,3 +66,21 @@ BEGIN
     RETURN result;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auth.get(
+    in_email TEXT = NULL
+) RETURNS TABLE(email TEXT) AS
+$$
+DECLARE
+    where_partial_query TEXT := '';
+BEGIN
+    IF in_email IS NOT NULL THEN
+        where_partial_query :=  format('WHERE email=%L', in_email);
+    END IF;
+
+    RETURN QUERY EXECUTE(
+        'SELECT email FROM auth.auth '
+        || where_partial_query
+        || ' ORDER BY email DESC');
+END;
+$$ LANGUAGE plpgsql;
