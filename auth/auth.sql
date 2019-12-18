@@ -1,4 +1,5 @@
 CREATE SCHEMA IF NOT EXISTS auth;
+SELECT set_config('search_path', 'auth, ' || current_setting('search_path'), FALSE);
 
 CREATE TABLE IF NOT EXISTS auth.auth (
     email TEXT PRIMARY KEY,
