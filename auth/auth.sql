@@ -28,7 +28,7 @@ CREATE TRIGGER hash_password
 CREATE OR REPLACE FUNCTION auth.create_or_update(
     in_email TEXT,
     in_password TEXT,
-    in_old_password TEXT = ''
+    in_old_password TEXT = NULL
 ) RETURNS BOOLEAN AS
 $$
 BEGIN
