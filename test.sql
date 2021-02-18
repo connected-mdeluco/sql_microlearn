@@ -4,7 +4,7 @@ SELECT '_' || md5(random()::text) AS db_name;
 
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
-\i auth/test.sql
+\i auth/test_auth.sql
 
 SELECT * FROM runtests();
 
