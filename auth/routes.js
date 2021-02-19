@@ -2,7 +2,7 @@
 
 /* eslint-disable no-template-curly-in-string */
 const queryListAuth = 'SELECT * FROM auth.get()';
-const queryCreateOrUpdateAuth = 'SELECT auth.create_or_update(${auth.email}, ${auth.password}, ${auth.old_password})';
+const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
 const queryAuthenticate = 'SELECT auth.authenticate(${auth.email}, ${auth.password})';
 const queryRemove = 'SELECT auth.remove(${auth.email}, ${auth.password})';
 /* eslint-enable no-template-curly-in-string */
@@ -18,9 +18,8 @@ module.exports = (router, opts) => {
       return res.send(results);
     })
     .post(async (req, res, _err) => {
-      req.body.old_password = req.body.old_password || null;
       try {
-        const results = await db.one(queryCreateOrUpdateAuth, { auth: req.body });
+        const results = await db.one(queryCreateOrUpdateAuth, req.body);
         return results.create_or_update ? res.status(201).end() : res.status(401).end();
       } catch (e) {
         logger.info(`Error creating or updating auth entry: ${e}`);

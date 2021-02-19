@@ -85,3 +85,21 @@ BEGIN
         || ' ORDER BY email DESC');
 END;
 $$ LANGUAGE plpgsql;
+
+----
+-- JSON API
+----
+
+CREATE OR REPLACE FUNCTION auth.create_or_update(
+    in_json JSON
+) RETURNS JSON AS
+$$
+    WITH records AS (
+        INSERT INTO auth.auth (email, password)
+        VALUES (in_json->>'email', in_json->>'password')
+        ON CONFLICT (email) DO UPDATE
+            SET password=in_json->>'password'
+            WHERE (auth.auth.password=crypt(in_json->>'old_password', auth.auth.password))
+        RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;
