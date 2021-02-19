@@ -113,3 +113,24 @@ $$
         WHERE email=in_json->>'email'
     ) SELECT to_json(r) FROM records r;
 $$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION auth.get_json(
+    IN in_json JSON = NULL,
+    OUT out_json JSON
+) RETURNS JSON AS $$
+DECLARE
+    where_partial_query TEXT := CASE
+        WHEN in_json IS NOT NULL THEN
+            format('WHERE email=%L', in_json->>'email')
+        ELSE
+            ''
+    END;
+BEGIN
+    EXECUTE format($query$
+        WITH records AS (
+            SELECT email FROM auth.auth a %s
+        ) SELECT json_agg(r) FROM records r
+    $query$, where_partial_query
+    ) INTO out_json;
+END;
+$$ LANGUAGE plpgsql;

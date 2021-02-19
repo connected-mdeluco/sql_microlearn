@@ -64,5 +64,27 @@ BEGIN
         AND results_json::JSONB <@ expected_json::JSONB,
         'Authenticates email and password'
     );
+
+    -- auth.get_json()
+    results_json = auth.get_json();
+    expected_json = format($$ [{
+        "email": "%s"
+    }] $$, _email);
+
+    RETURN NEXT ok(
+        results_json::JSONB @> expected_json::JSONB
+        AND results_json::JSONB <@ expected_json::JSONB,
+        'Gets emails'
+    );
+
+    PERFORM auth.create_or_update('{"email": "xyzzy@example.com", "password": "setecastronomy"}'::JSON);
+    results_json = auth.get_json(format('{"email": "%s"}', _email)::JSON);
+
+    RETURN NEXT ok(
+        results_json::JSONB @> expected_json::JSONB
+        AND results_json::JSONB <@ expected_json::JSONB,
+        'Gets specific email'
+    );
+
 END;
 $testsuite$ LANGUAGE plpgsql;

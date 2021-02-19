@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 
 /* eslint-disable no-template-curly-in-string */
-const queryListAuth = 'SELECT * FROM auth.get()';
+const queryListAuth = 'SELECT * FROM auth.get_json($1)';
 const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
 const queryAuthenticate = 'SELECT * FROM auth.authenticate($1)';
 const queryRemove = 'SELECT auth.remove(${auth.email}, ${auth.password})';
@@ -13,9 +13,14 @@ module.exports = (router, opts) => {
 
   router
     .route('/')
-    .get(async (_req, res, _err) => {
-      const results = await db.manyOrNone(queryListAuth);
-      return res.send(results);
+    .get(async (req, res, _err) => {
+      try {
+        const results = await db.one(queryListAuth, req.body);
+        return res.send(results['out_json']);
+      } catch (e) {
+        logger.info(`Error get auth list: ${e}`);
+        return res.status(500).end();
+      }
     })
     .post(async (req, res, _err) => {
       try {

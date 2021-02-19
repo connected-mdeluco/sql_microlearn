@@ -8,9 +8,18 @@ const router = require('./router')({
 });
 
 const app = express();
+
 app.use(bodyParser.text({
-  type: 'application/json'
+  type: ['', 'application/json']
 }));
+
+app.use((req) => {
+  if (!req.get('content-type')) {
+    req.body = null;
+  }
+  req.next();
+});
+
 app.use('/api', router);
 
 const server = app.listen(process.env.port, () => {
