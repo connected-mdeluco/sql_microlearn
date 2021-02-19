@@ -3,7 +3,7 @@
 /* eslint-disable no-template-curly-in-string */
 const queryListAuth = 'SELECT * FROM auth.get()';
 const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
-const queryAuthenticate = 'SELECT auth.authenticate(${auth.email}, ${auth.password})';
+const queryAuthenticate = 'SELECT * FROM auth.authenticate($1)';
 const queryRemove = 'SELECT auth.remove(${auth.email}, ${auth.password})';
 /* eslint-enable no-template-curly-in-string */
 
@@ -28,7 +28,7 @@ module.exports = (router, opts) => {
     })
     .put(async (req, res, _err) => {
       try {
-        const results = await db.one(queryAuthenticate, { auth: req.body });
+        const results = await db.one(queryAuthenticate, req.body);
         return results.authenticate ? res.status(200).end() : res.status(401).end();
       } catch (e) {
         logger.info(`Error with authorization: ${e}`);

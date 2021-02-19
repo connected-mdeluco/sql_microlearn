@@ -103,3 +103,13 @@ $$
         RETURNING email
     ) SELECT json_agg(r) FROM records r;
 $$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION auth.authenticate(in_json JSON)
+RETURNS JSON AS
+$$
+    WITH records AS (
+        SELECT password=crypt(in_json->>'password', password) AS authenticate
+        FROM auth.auth
+        WHERE email=in_json->>'email'
+    ) SELECT to_json(r) FROM records r;
+$$ LANGUAGE sql;

@@ -51,5 +51,18 @@ BEGIN
         'Validates password on updated record'
     ) FROM auth.auth WHERE email=_email;
 
+    -- auth.authenticate()
+    payload_json = format($$
+        {"email": "%s", "password": "%s"}
+    $$, _email, new_plaintext_password);
+
+    results_json = auth.authenticate(payload_json);
+    expected_json = '{"authenticate": true}';
+
+    RETURN NEXT ok(
+        results_json::JSONB @> expected_json::JSONB
+        AND results_json::JSONB <@ expected_json::JSONB,
+        'Authenticates email and password'
+    );
 END;
 $testsuite$ LANGUAGE plpgsql;
