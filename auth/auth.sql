@@ -134,3 +134,18 @@ BEGIN
     ) INTO out_json;
 END;
 $$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auth.remove(
+    in_json JSON
+) RETURNS JSON AS
+$$
+    WITH records AS (
+        DELETE FROM auth.auth
+        WHERE email IN (
+            SELECT r.email
+            FROM json_populate_recordset(NULL::auth.auth, in_json) r
+            JOIN auth.auth a
+                ON (a.email = r.email AND a.password=crypt(r.password, a.password))
+        ) RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;

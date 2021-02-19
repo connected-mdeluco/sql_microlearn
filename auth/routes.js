@@ -4,7 +4,7 @@
 const queryListAuth = 'SELECT * FROM auth.get_json($1)';
 const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
 const queryAuthenticate = 'SELECT * FROM auth.authenticate($1)';
-const queryRemove = 'SELECT auth.remove(${auth.email}, ${auth.password})';
+const queryRemove = 'SELECT * FROM auth.remove($1)';
 /* eslint-enable no-template-curly-in-string */
 
 module.exports = (router, opts) => {
@@ -42,8 +42,8 @@ module.exports = (router, opts) => {
     })
     .delete(async (req, res, _err) => {
       try {
-        const results = await db.one(queryRemove, { auth: req.body });
-        return results.remove === req.body.email ? res.status(204).end() : res.status(401).end();
+        const results = await db.one(queryRemove, req.body);
+        return res.send(results['remove'] || []);
       } catch (e) {
         logger.info(`Error deleting auth entry: ${e}`);
         return res.status(500).end();

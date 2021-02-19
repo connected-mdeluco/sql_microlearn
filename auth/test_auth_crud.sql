@@ -79,11 +79,26 @@ BEGIN
 
     PERFORM auth.create_or_update('{"email": "xyzzy@example.com", "password": "setecastronomy"}'::JSON);
     results_json = auth.get_json(format('{"email": "%s"}', _email)::JSON);
+    -- expected_json above
 
     RETURN NEXT ok(
         results_json::JSONB @> expected_json::JSONB
         AND results_json::JSONB <@ expected_json::JSONB,
         'Gets specific email'
+    );
+
+    -- auth.remove()
+    payload_json = format($$ [
+        {"email": "%s", "password": "%s"}
+    ] $$, _email, new_plaintext_password);
+
+    results_json = auth.remove(payload_json);
+    -- expected_json above
+
+    RETURN NEXT ok(
+        results_json::JSONB @> expected_json::JSONB
+        AND results_json::JSONB <@ expected_json::JSONB,
+        'Removes emails'
     );
 
 END;
