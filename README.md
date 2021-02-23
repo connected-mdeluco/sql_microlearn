@@ -2,10 +2,11 @@
 A demonstration of [PostgreSQL](https://www.postgresql.org), [JSON](https://www.postgresql.org/docs/13/functions-json.html),
 and [pgTAP](https://pgtap.org) with a Node/Express app.
 
-## PostgreSQL / JSON
+## PostgreSQL
 [PostgreSQL.org](https://www.postgresql.org)
 > "PostgreSQL: The World's Most Advanced Open Source Relational Database"
 
+### JSON
 PostgreSQL features functions and operators for querying and working with JSON.
 
 This project focuses on using those tools to build a "CRUD" API on the database itself
@@ -18,6 +19,10 @@ to learn and take advantage of these features in Postgre; an opportunity to do t
 
 See [examples](#examples) below for a few queries that demonstrate the JSON functions and
 operators used most in this project.
+
+### Database Model Notes
+Notice that any functions involving cryptography are necessarily slow - bcrypt with 12 iterations
+is a time consuming process by design. Read more [about bcrypt](https://en.wikipedia.org/wiki/Bcrypt) (Wikipedia).
 
 ## pgTAP
 [pgTAP.org](https://pgtap.org)
