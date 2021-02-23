@@ -84,6 +84,35 @@
 					"response": []
 				},
 				{
+					"name": "create multiple records",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\n    {\n        \"email\": \"{{email}}\",\n        \"password\": \"{{password}}\"\n    },\n    {\n        \"email\": \"bishop@example.com\",\n        \"password\": \"fort red border\"\n    }\n]"
+						},
+						"url": {
+							"raw": "{{url}}/auth/createmultiple",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"auth",
+								"createmultiple"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "update password",
 					"request": {
 						"method": "POST",
