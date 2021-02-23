@@ -27,6 +27,11 @@ pgTAP is a very useful tool for unit testing database models, configuration, per
 It enables the type of rapid iteration common in other areas of software development that take advantage of
 unit and integration testing.
 
+## Postman
+A Postman collection and environment configuration are included that may be used to interact
+with the webserver:
+* [misc/"Microlearn App.postman_collection.json](misc/)
+* [misc/"Microlearn App.postman_environment.json"](misc/)
 
 ## Examples
 Reference:
