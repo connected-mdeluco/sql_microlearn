@@ -183,3 +183,8 @@ $ psql
 
 #
 ```
+
+## Notes
+### REST API
+The REST API defined by the backend webserver does not necessarily conform to REST API best practices.
+The intent of this project is more to demonstrate the database API.

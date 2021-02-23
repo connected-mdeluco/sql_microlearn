@@ -2,6 +2,7 @@
 
 /* eslint-disable no-template-curly-in-string */
 const queryListAuth = 'SELECT * FROM auth.get_json($1)';
+const queryCreate = 'SELECT * FROM auth.create($1)';
 const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
 const queryAuthenticate = 'SELECT * FROM auth.authenticate($1)';
 const queryRemove = 'SELECT * FROM auth.remove($1)';
@@ -49,4 +50,16 @@ module.exports = (router, opts) => {
         return res.status(500).end();
       }
     });
+
+    router
+      .route('/createmultiple')
+      .post(async (req, res, _err) => {
+        try {
+          const results = await db.one(queryCreate, req.body);
+          return res.send(results['create']);
+        } catch (e) {
+          logger.info(`Error with create (multiple): ${e}`);
+          return res.status(500).end()
+        }
+      });
 };
