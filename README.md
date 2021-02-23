@@ -34,6 +34,8 @@ Reference:
 * [Aggregate Functions](https://www.postgresql.org/docs/13/functions-aggregate.html)
 * [WITH Queries](https://www.postgresql.org/docs/9.1/queries-with.html) (not used below)
 
+### API
+This is a demonstration of the database JSON CRUD API built in the microlearn.
 ```
 $ cd sql_microlearn
 $ psql
@@ -62,6 +64,67 @@ $ psql
 ---------------------------------------------------------------------
  [{"email" : "cosmo@example.com"}, {"email" : "bishop@example.com"}]
 (1 row)
+
+# -- Authenticate a record
+# SELECT * FROM auth.authenticate('{"email": "cosmo@example.com", "password": "setec astronomy"}'::JSON);
+     authenticate      
+-----------------------
+ {"authenticate":true}
+(1 row)
+
+# -- Retrieve all records
+# SELECT * FROM auth.get_json();
+             out_json             
+----------------------------------
+ [{"email":"cosmo@example.com"}, +
+  {"email":"bishop@example.com"}]
+(1 row)
+
+# -- Retrieve a specific record
+# SELECT * FROM auth.get_json('{"email": "bishop@example.com"}'::JSON);
+             out_json             
+----------------------------------
+ [{"email":"bishop@example.com"}]
+(1 row)
+
+# -- Update a record
+# SELECT * FROM auth.create_or_update('{"email": "bishop@example.com", "password": "robert redford", "old_password": "fort red border"}'::JSON);   
+         create_or_update         
+----------------------------------
+ [{"email":"bishop@example.com"}]
+(1 row)
+
+# -- Authenticate the updated record
+# SELECT * FROM auth.authenticate('{"email": "bishop@example.com", "password": "robert redford"}'::JSON);
+     authenticate      
+-----------------------
+ {"authenticate":true}
+(1 row)
+
+# -- Remove a record
+# -- Note the JSON array, this function takes one or more records to be removed
+# SELECT auth.remove('[{"email": "bishop@example.com", "password": "robert redford"}]'::JSON);
+              remove              
+----------------------------------
+ [{"email":"bishop@example.com"}]
+(1 row)
+
+# -- Remove a record (incorrect password)
+# -- Returns no records, i.e. no records removed
+# SELECT auth.remove('[{"email": "cosmo@example.com", "password": "xyzzy"}]'::JSON);
+ remove 
+--------
+ 
+(1 row)
+
+#
+```
+
+### JSON
+These are general examples demonstrating the use of PostgreSQL JSON functions and operators.
+
+```
+$ psql
 
 # -- Query a JSON array of objects
 # SELECT * FROM json_populate_recordset(NULL::auth.auth, '[{"email": "whistler@example.com", "password": "ad variant thirds"}]'::JSON);
@@ -112,4 +175,6 @@ $ psql
 -----------------------
  t
 (1 row)
+
+#
 ```
