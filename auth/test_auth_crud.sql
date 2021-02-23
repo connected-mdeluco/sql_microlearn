@@ -101,5 +101,23 @@ BEGIN
         'Removes emails'
     );
 
+    -- Create multiple
+    payload_json = format($$ [
+        {"email": "%s", "password": "%s"},
+        {"email": "%s", "password": "%s"}
+    ] $$, _email, plaintext_password, _alt_email, plaintext_password);
+
+    results_json = auth.create(payload_json);
+    expected_json = format($$ [
+        {"email": "%s"},
+        {"email": "%s"}
+    ] $$, _email, _alt_email);
+
+    RETURN NEXT ok(
+        results_json::JSONB @> expected_json::JSONB
+        AND results_json::JSONB <@ expected_json::JSONB,
+        'Creates multiple accounts'
+    );
+
 END;
 $testsuite$ LANGUAGE plpgsql;

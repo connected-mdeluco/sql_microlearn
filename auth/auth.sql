@@ -104,6 +104,16 @@ $$
     ) SELECT json_agg(r) FROM records r;
 $$ LANGUAGE sql;
 
+CREATE OR REPLACE FUNCTION auth.create(in_json JSON)
+RETURNS JSON AS
+$$
+    WITH records AS (
+        INSERT INTO auth.auth (email, password)
+        SELECT x.email, x.password FROM json_to_recordset(in_json) AS x(email TEXT, password TEXT)
+        RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;
+
 CREATE OR REPLACE FUNCTION auth.authenticate(in_json JSON)
 RETURNS JSON AS
 $$
