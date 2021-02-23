@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 
 /* eslint-disable no-template-curly-in-string */
-const queryListAuth = 'SELECT * FROM auth.get()';
-const queryCreateOrUpdateAuth = 'SELECT auth.create_or_update(${auth.email}, ${auth.password}, ${auth.old_password})';
-const queryAuthenticate = 'SELECT auth.authenticate(${auth.email}, ${auth.password})';
-const queryRemove = 'SELECT auth.remove(${auth.email}, ${auth.password})';
+const queryListAuth = 'SELECT * FROM auth.get_json($1)';
+const queryCreate = 'SELECT * FROM auth.create($1)';
+const queryCreateOrUpdateAuth = 'SELECT * FROM auth.create_or_update($1)';
+const queryAuthenticate = 'SELECT * FROM auth.authenticate($1)';
+const queryRemove = 'SELECT * FROM auth.remove($1)';
 /* eslint-enable no-template-curly-in-string */
 
 module.exports = (router, opts) => {
@@ -13,14 +14,18 @@ module.exports = (router, opts) => {
 
   router
     .route('/')
-    .get(async (_req, res, _err) => {
-      const results = await db.manyOrNone(queryListAuth);
-      return res.send(results);
+    .get(async (req, res, _err) => {
+      try {
+        const results = await db.one(queryListAuth, req.body);
+        return res.send(results['out_json']);
+      } catch (e) {
+        logger.info(`Error get auth list: ${e}`);
+        return res.status(500).end();
+      }
     })
     .post(async (req, res, _err) => {
-      req.body.old_password = req.body.old_password || null;
       try {
-        const results = await db.one(queryCreateOrUpdateAuth, { auth: req.body });
+        const results = await db.one(queryCreateOrUpdateAuth, req.body);
         return results.create_or_update ? res.status(201).end() : res.status(401).end();
       } catch (e) {
         logger.info(`Error creating or updating auth entry: ${e}`);
@@ -29,7 +34,7 @@ module.exports = (router, opts) => {
     })
     .put(async (req, res, _err) => {
       try {
-        const results = await db.one(queryAuthenticate, { auth: req.body });
+        const results = await db.one(queryAuthenticate, req.body);
         return results.authenticate ? res.status(200).end() : res.status(401).end();
       } catch (e) {
         logger.info(`Error with authorization: ${e}`);
@@ -38,11 +43,23 @@ module.exports = (router, opts) => {
     })
     .delete(async (req, res, _err) => {
       try {
-        const results = await db.one(queryRemove, { auth: req.body });
-        return results.remove === req.body.email ? res.status(204).end() : res.status(401).end();
+        const results = await db.one(queryRemove, req.body);
+        return res.send(results['remove'] || []);
       } catch (e) {
         logger.info(`Error deleting auth entry: ${e}`);
         return res.status(500).end();
       }
     });
+
+    router
+      .route('/createmultiple')
+      .post(async (req, res, _err) => {
+        try {
+          const results = await db.one(queryCreate, req.body);
+          return res.send(results['create']);
+        } catch (e) {
+          logger.info(`Error with create (multiple): ${e}`);
+          return res.status(500).end()
+        }
+      });
 };

@@ -85,3 +85,77 @@ BEGIN
         || ' ORDER BY email DESC');
 END;
 $$ LANGUAGE plpgsql;
+
+----
+-- JSON API
+----
+
+CREATE OR REPLACE FUNCTION auth.create_or_update(
+    in_json JSON
+) RETURNS JSON AS
+$$
+    WITH records AS (
+        INSERT INTO auth.auth (email, password)
+        VALUES (in_json->>'email', in_json->>'password')
+        ON CONFLICT (email) DO UPDATE
+            SET password=in_json->>'password'
+            WHERE (auth.auth.password=crypt(in_json->>'old_password', auth.auth.password))
+        RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION auth.create(in_json JSON)
+RETURNS JSON AS
+$$
+    WITH records AS (
+        INSERT INTO auth.auth (email, password)
+        SELECT x.email, x.password FROM json_to_recordset(in_json) AS x(email TEXT, password TEXT)
+        RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION auth.authenticate(in_json JSON)
+RETURNS JSON AS
+$$
+    WITH records AS (
+        SELECT password=crypt(in_json->>'password', password) AS authenticate
+        FROM auth.auth
+        WHERE email=in_json->>'email'
+    ) SELECT to_json(r) FROM records r;
+$$ LANGUAGE sql;
+
+CREATE OR REPLACE FUNCTION auth.get_json(
+    IN in_json JSON = NULL,
+    OUT out_json JSON
+) RETURNS JSON AS $$
+DECLARE
+    where_partial_query TEXT := CASE
+        WHEN in_json IS NOT NULL THEN
+            format('WHERE email=%L', in_json->>'email')
+        ELSE
+            ''
+    END;
+BEGIN
+    EXECUTE format($query$
+        WITH records AS (
+            SELECT email FROM auth.auth a %s
+        ) SELECT json_agg(r) FROM records r
+    $query$, where_partial_query
+    ) INTO out_json;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION auth.remove(
+    in_json JSON
+) RETURNS JSON AS
+$$
+    WITH records AS (
+        DELETE FROM auth.auth
+        WHERE email IN (
+            SELECT r.email
+            FROM json_populate_recordset(NULL::auth.auth, in_json) r
+            JOIN auth.auth a
+                ON (a.email = r.email AND a.password=crypt(r.password, a.password))
+        ) RETURNING email
+    ) SELECT json_agg(r) FROM records r;
+$$ LANGUAGE sql;
