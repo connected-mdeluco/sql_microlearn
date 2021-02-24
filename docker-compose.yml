@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres:13-alpine
+    restart: always
+    env_file:
+      - ./env/development.env
+    expose:
+      - "5432"
+    volumes:
+      - ./:/app
+      - ./init-database.sh:/docker-entrypoint-initdb.d/init-database.sh
+
+  web:
+    image: node:14-alpine
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+    working_dir: /app
+    env_file:
+      - ./env/development.env
+    command: "npm start"
+    depends_on:
+      - database
