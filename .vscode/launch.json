@@ -13,10 +13,10 @@
             ],
             "program": "${workspaceFolder}/app.js",
             "env": {
-                "port": "3000",
-                "pg_host": "localhost",
-                "pg_port": "5432",
-                "pg_database": "sql_microlearn"
+                "NODE_PORT": "3000",
+                "POSTGRES_HOST": "localhost",
+                "POSTGRES_PORT": "5432",
+                "POSTGRES_DB": "sql_microlearn"
             },
             "outputCapture": "std",
             "resolveSourceMapLocations": [

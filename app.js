@@ -22,8 +22,8 @@ app.use((req) => {
 
 app.use('/api', router);
 
-const server = app.listen(process.env.port, () => {
-  logger.info(`Server running on port ${process.env.port}`);
+const server = app.listen(process.env.NODE_PORT, () => {
+  logger.info(`Server running on port ${process.env.NODE_PORT}`);
 });
 
 module.exports = server;
