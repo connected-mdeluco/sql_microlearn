@@ -91,12 +91,14 @@ Reference:
 * [WITH Queries](https://www.postgresql.org/docs/9.1/queries-with.html) (not used below)
 
 ### API
-This is a demonstration of the database JSON CRUD API built in the microlearn.
+This is a demonstration of the database JSON CRUD API built in the microlearn. It is assumed that
+the docker container is running and has been setup according to the ["quick" start](#quick-start).
 ```
-$ cd sql_microlearn
-$ psql
-# \set db_name sql_microlearn
-# \i database.sql
+$ docker exec -it -w /app sql_microlearn_database_1 psql -U microlearner sql_microlearn
+
+# -- Delete any existing records
+# DELETE FROM auth;
+DELETE 1
 
 # -- Using JSON, add two records to the auth table
 # SELECT * FROM auth.create('[{"email": "cosmo@example.com", "password": "setec astronomy"}, {"email": "bishop@example.com", "password": "fort red border"}]'::JSON);
@@ -177,10 +179,19 @@ $ psql
 ```
 
 ### JSON
-These are general examples demonstrating the use of PostgreSQL JSON functions and operators.
+These are general examples demonstrating the use of PostgreSQL JSON functions and operators. It is assumed that
+the docker container is running, and connects to the default user database `microlearner` (not the `sql_microlearn`
+database created in the "quick" start.)
 
 ```
-$ psql
+$ docker exec -it -w /app sql_microlearn_database_1 psql -U microlearner microlearner
+
+# -- Note, (optional) list database with the following command:
+# \l
+...
+#  -- Note, (optional) connect to another database with the following command:
+# \c sql_microlearn
+...
 
 # -- Query a JSON array of objects
 # SELECT * FROM json_populate_recordset(NULL::auth.auth, '[{"email": "whistler@example.com", "password": "ad variant thirds"}]'::JSON);
