@@ -2,6 +2,52 @@
 A demonstration of [PostgreSQL](https://www.postgresql.org), [JSON](https://www.postgresql.org/docs/13/functions-json.html),
 and [pgTAP](https://pgtap.org) with a Node/Express app.
 
+## Requirements
+* [Node.js](https://nodejs.org/en/)
+* [Docker](https://www.docker.com)
+* [Postman](https://www.postman.com)
+
+## "Quick" Start
+To start, open a terminal and follow the commands below.
+* Clone the project
+* Install npm dependencies
+* Build the docker containers
+* Connect to the database, test it, and load it
+
+Note that the backend app container exposes port 3000 and will not run
+if that port is already bound (to a different running Node/Express app, for example.)
+
+```
+$ git clone git@github.com:connected-mdeluco/sql_microlearn.git
+...
+$ cd sql_microlearn
+$ npm install
+...
+$ COMPOSE_PROJECT_NAME=sql_microlearn && docker-compose up --build -d
+...
+$ docker exec -it -w /app sql_microlearn_database_1 psql -U microlearner microlearner
+psql (12.6 (Ubuntu 12.6-0ubuntu0.20.10.1))
+Type "help" for help.
+
+microlearner=# -- Try running the test suite
+microlearner=# \i test.sql
+...
+microlearner=# -- Set a database name variable on the session
+microlearner=# \set db_name sql_microlearn
+microlearner=# -- Build the database
+microlearner=# \i database.sql
+...
+microlearner=# -- The database is now available for the app
+```
+
+Open Postman and import the collection and environment found in `misc/`.
+
+Making sure you've selected the `Microlearn App` environment, experiment with the API:
+* Create a record with `POST create authorized email`
+* Verify the record exists with `GET get list of authorized emails`
+* Authorize a record with `PUT authorize an email`
+* Remove a record with `DEL remove email`
+
 ## PostgreSQL
 [PostgreSQL.org](https://www.postgresql.org)
 > "PostgreSQL: The World's Most Advanced Open Source Relational Database"
